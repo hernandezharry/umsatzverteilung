@@ -112,10 +112,10 @@ if uploaded_file:
         ))
 
     fig.update_layout(
-    font=dict(size=14),
-    xaxis=dict(title_font=dict(size=16), tickfont=dict(size=12), tickangle=-30),
-    yaxis=dict(title_font=dict(size=16), tickfont=dict(size=12)),
-    legend=dict(font=dict(size=12)),
+    font=dict(size=14, color='black'),
+    xaxis=dict(title_font=dict(size=16, color='black'), tickfont=dict(size=12, color='black'), tickangle=-30),
+    yaxis=dict(title_font=dict(size=16, color='black'), tickfont=dict(size=12)),
+    legend=dict(font=dict(size=12), font_color='black'),
         barmode='stack',
         title="Monatliche Auftragssumme – gestapelt nach Phase",
         xaxis_title="Monat",
@@ -148,7 +148,8 @@ if uploaded_file:
             df_kosten["Gewährleistung"] = (df_kosten["Gewährleistung"] / 100) * df_kosten["Auftragssumme"]
 
         df_kosten = df_kosten.groupby("Projekt").sum(numeric_only=True)
-        df_kosten = df_kosten[[col for col in kosten_spalten if col in df_kosten.columns]]
+        # Reorganisiere für gestapelte Darstellung
+df_kosten = df_kosten[[col for col in kosten_spalten if col in df_kosten.columns]].fillna(0)
 
         fig2 = go.Figure()
         farben_kosten = {
@@ -167,10 +168,10 @@ if uploaded_file:
             ))
 
         fig2.update_layout(
-    font=dict(size=14),
-    xaxis=dict(title_font=dict(size=16), tickfont=dict(size=12), tickangle=-30),
-    yaxis=dict(title_font=dict(size=16), tickfont=dict(size=12)),
-    legend=dict(font=dict(size=12)),
+    font=dict(size=14, color='black'),
+    xaxis=dict(title_font=dict(size=16, color='black'), tickfont=dict(size=12, color='black'), tickangle=-30),
+    yaxis=dict(title_font=dict(size=16, color='black'), tickfont=dict(size=12)),
+    legend=dict(font=dict(size=12), font_color='black'),
             barmode='group',
             title="Projektkosten nach Typ",
             xaxis_title="Projekt",
@@ -190,3 +191,52 @@ if uploaded_file:
         st.download_button("📥 Kosten-Daten als CSV", data=csv2, file_name="projektkosten.csv", mime="text/csv")
     else:
         st.info("Keine der Spalten 'Herstellkosten', 'Gewährleistung', 'Ergebnis' in den Daten gefunden.")
+
+    # GANTT: Zeitachse der Projekte mit Tooltips zu Kosten
+    st.subheader("📅 Projekt-Zeitplan (Gantt-Diagramm)")
+
+    if "Beginn" in df_filtered.columns and "Ende" in df_filtered.columns:
+        gantt_df = df_filtered.copy()
+        gantt_df["Beginn"] = pd.to_datetime(gantt_df["Beginn"])
+        gantt_df["Ende"] = pd.to_datetime(gantt_df["Ende"])
+        gantt_df["Dauer"] = (gantt_df["Ende"] - gantt_df["Beginn"]).dt.days
+
+        gantt_data = []
+        for _, row in gantt_df.iterrows():
+            kosten = f"Herstellkosten: € {row['Herstellkosten']}" if 'Herstellkosten' in row and not pd.isna(row['Herstellkosten']) else "Herstellkosten: n.v."
+            gewaehr = f"Gewährleistung: {row['Gewährleistung']}%" if 'Gewährleistung' in row and not pd.isna(row['Gewährleistung']) else "Gewährleistung: n.v."
+            ergebnis = f"Ergebnis: {row['Ergebnis']}%" if 'Ergebnis' in row and not pd.isna(row['Ergebnis']) else "Ergebnis: n.v."
+            text = f"Projekt: {row['Projekt']}<br>{kosten}<br>{gewaehr}<br>{ergebnis}"
+            gantt_data.append(dict(
+                Task=row["Projekt"],
+                Start=row["Beginn"],
+                Finish=row["Ende"],
+                Description=text
+            ))
+
+        gantt_fig = go.Figure()
+        for task in gantt_data:
+            gantt_fig.add_trace(go.Bar(
+                x=[(task["Finish"] - task["Start"]).days],
+                y=[task["Task"]],
+                base=task["Start"],
+                orientation='h',
+                name=task["Task"],
+                hovertemplate=task["Description"] + "<extra></extra>",
+                marker_color="#1f77b4"
+            ))
+
+        gantt_fig.update_layout(
+            title="Projektzeitraum (Gantt-Diagramm)",
+            xaxis_title="Datum",
+            yaxis_title="Projekt",
+            xaxis=dict(type='date'),
+            font=dict(size=14, color="black"),
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            hovermode="closest",
+            showlegend=False,
+            height=600
+        )
+
+        st.plotly_chart(gantt_fig, use_container_width=True)
