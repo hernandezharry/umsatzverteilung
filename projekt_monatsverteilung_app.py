@@ -183,28 +183,33 @@ if uploaded_file:
     gantt_data["Ende"] = pd.to_datetime(gantt_data["Ende"])
     gantt_data["Dauer"] = (gantt_data["Ende"] - gantt_data["Beginn"]).dt.days
 
+    
     gantt_fig = go.Figure()
+
     for _, row in gantt_data.iterrows():
+        if row["Dauer"] <= 0:
+            continue
         text = f"{row['Projekt']}<br>Herstellkosten: {row.get('Herstellkosten', 'n.v.')}<br>Ergebnis: {row.get('Ergebnis', 'n.v.')}%<br>Gewährleistung: {row.get('Gewährleistung', 'n.v.')}%"
         gantt_fig.add_trace(go.Bar(
-            x=[row["Dauer"]],
-            y=[row["Projekt"]],
-            base=row["Beginn"],
+            x=[row["Beginn"], row["Ende"]],
+            y=[row["Projekt"], row["Projekt"]],
             orientation="h",
             hovertemplate=text + "<extra></extra>",
-            marker_color="#1f77b4"
+            marker=dict(color="#1f77b4"),
+            showlegend=False
         ))
 
     gantt_fig.update_layout(
-    title="Projektzeiträume",
-    font=dict(size=13, color="white"),
-    paper_bgcolor="#0e1117",
-    plot_bgcolor="#0e1117",
-    xaxis_title="Datum", xaxis=dict(type="date", tickfont=dict(color="white")),
-    yaxis_title="Projekt", yaxis=dict(tickfont=dict(color="white")),
-    legend=dict(font=dict(color="white")),
-    height=600,
-    showlegend=False
-)
+        title="Projektzeiträume",
+        font=dict(size=13, color="white"),
+        paper_bgcolor="#0e1117",
+        plot_bgcolor="#0e1117",
+        xaxis_title="Datum",
+        xaxis=dict(type="date", tickfont=dict(color="white")),
+        yaxis_title="Projekt",
+        yaxis=dict(tickfont=dict(color="white")),
+        height=600
+    )
 
     st.plotly_chart(gantt_fig, use_container_width=True)
+
