@@ -118,6 +118,13 @@ if uploaded_file:
         ))
 
     fig.update_layout(
+    paper_bgcolor="#0e1117",
+    plot_bgcolor="#0e1117",
+    font=dict(size=13, color="white"),
+    xaxis=dict(title="Monat", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    yaxis=dict(title="Auftragssumme (€)", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    legend=dict(font=dict(color="white")),
+
         barmode="stack",
         title="Monatliche Auftragssumme – gestapelt nach Phase",
         xaxis_title="Monat",
@@ -194,6 +201,13 @@ if uploaded_file:
         ))
 
     gantt_fig.update_layout(
+    paper_bgcolor="#0e1117",
+    plot_bgcolor="#0e1117",
+    font=dict(size=13, color="white"),
+    xaxis=dict(title="Monat", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    yaxis=dict(title="Auftragssumme (€)", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    legend=dict(font=dict(color="white")),
+
         title="Projektzeiträume",
         xaxis_title="Datum",
         yaxis_title="Projekt",
