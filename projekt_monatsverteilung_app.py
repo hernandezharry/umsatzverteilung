@@ -66,7 +66,7 @@ if uploaded_file:
             lauf = (lauf + pd.DateOffset(months=1)).replace(day=1)
 
     st.subheader("📋 Verteilungstabelle")
-    st.dataframe(df_matrix.style.format("€ {:,.2f}"))
+    st.dataframe(df_matrix.style.format("€ {:,.2f}").set_properties(**{"font-size": "14px", "color": "black"}))
 
     df_result = pd.DataFrame(0.0, index=monat_colnames, columns=[])
     grouped = df_filtered.groupby("Phase")
@@ -112,10 +112,10 @@ if uploaded_file:
         ))
 
     fig.update_layout(
-    font=dict(size=14, color='black'),
-    xaxis=dict(title_font=dict(size=16, color='black'), tickfont=dict(size=12, color='black'), tickangle=-30),
-    yaxis=dict(title_font=dict(size=16, color='black'), tickfont=dict(size=12)),
-    legend=dict(font=dict(size=12), font_color='black'),
+    font=dict(size=14),
+    xaxis=dict(title_font=dict(size=16), tickfont=dict(size=12), tickangle=-30),
+    yaxis=dict(title_font=dict(size=16), tickfont=dict(size=12)),
+    legend=dict(font=dict(size=12)),
         barmode='stack',
         title="Monatliche Auftragssumme – gestapelt nach Phase",
         xaxis_title="Monat",
@@ -148,8 +148,7 @@ if uploaded_file:
             df_kosten["Gewährleistung"] = (df_kosten["Gewährleistung"] / 100) * df_kosten["Auftragssumme"]
 
         df_kosten = df_kosten.groupby("Projekt").sum(numeric_only=True)
-        # Reorganisiere für gestapelte Darstellung
-df_kosten = df_kosten[[col for col in kosten_spalten if col in df_kosten.columns]].fillna(0)
+        df_kosten = df_kosten[[col for col in kosten_spalten if col in df_kosten.columns]]
 
         fig2 = go.Figure()
         farben_kosten = {
@@ -168,10 +167,10 @@ df_kosten = df_kosten[[col for col in kosten_spalten if col in df_kosten.columns
             ))
 
         fig2.update_layout(
-    font=dict(size=14, color='black'),
-    xaxis=dict(title_font=dict(size=16, color='black'), tickfont=dict(size=12, color='black'), tickangle=-30),
-    yaxis=dict(title_font=dict(size=16, color='black'), tickfont=dict(size=12)),
-    legend=dict(font=dict(size=12), font_color='black'),
+    font=dict(size=14),
+    xaxis=dict(title_font=dict(size=16), tickfont=dict(size=12), tickangle=-30),
+    yaxis=dict(title_font=dict(size=16), tickfont=dict(size=12)),
+    legend=dict(font=dict(size=12)),
             barmode='group',
             title="Projektkosten nach Typ",
             xaxis_title="Projekt",
