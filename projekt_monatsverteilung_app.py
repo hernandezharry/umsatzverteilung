@@ -118,22 +118,16 @@ if uploaded_file:
         ))
 
     fig.update_layout(
+    barmode="stack",
+    title="Monatliche Auftragssumme – gestapelt nach Phase",
+    font=dict(size=13, color="white"),
     paper_bgcolor="#0e1117",
     plot_bgcolor="#0e1117",
-    font=dict(size=13, color="white"),
     xaxis=dict(title="Monat", titlefont=dict(color="white"), tickfont=dict(color="white")),
     yaxis=dict(title="Auftragssumme (€)", titlefont=dict(color="white"), tickfont=dict(color="white")),
     legend=dict(font=dict(color="white")),
-
-        barmode="stack",
-        title="Monatliche Auftragssumme – gestapelt nach Phase",
-        xaxis_title="Monat",
-        yaxis_title="Auftragssumme (€)",
-        font=dict(size=13, color="black"),
-        height=500,
-        plot_bgcolor="white",
-        paper_bgcolor="white"
-    )
+    height=500
+)
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -169,6 +163,16 @@ if uploaded_file:
             ))
 
         fig2.update_layout(
+    barmode="group",
+    title="Projektkosten nach Typ",
+    font=dict(size=13, color="white"),
+    paper_bgcolor="#0e1117",
+    plot_bgcolor="#0e1117",
+    xaxis=dict(title="Projekt", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    yaxis=dict(title="Betrag (€)", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    legend=dict(font=dict(color="white")),
+    height=500
+)
             barmode="group",
             title="Projektkosten nach Typ",
             xaxis_title="Projekt",
@@ -201,22 +205,25 @@ if uploaded_file:
         ))
 
     gantt_fig.update_layout(
+    title="Projektzeiträume",
+    font=dict(size=13, color="white"),
     paper_bgcolor="#0e1117",
     plot_bgcolor="#0e1117",
+    xaxis=dict(title="Datum", titlefont=dict(color="white"), tickfont=dict(color="white"), type="date"),
+    yaxis=dict(title="Projekt", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    legend=dict(font=dict(color="white")),
+    height=600,
+    showlegend=False
+)
+    barmode="stack",
+    title="Monatliche Auftragssumme – gestapelt nach Phase",
     font=dict(size=13, color="white"),
+    paper_bgcolor="#0e1117",
+    plot_bgcolor="#0e1117",
     xaxis=dict(title="Monat", titlefont=dict(color="white"), tickfont=dict(color="white")),
     yaxis=dict(title="Auftragssumme (€)", titlefont=dict(color="white"), tickfont=dict(color="white")),
     legend=dict(font=dict(color="white")),
-
-        title="Projektzeiträume",
-        xaxis_title="Datum",
-        yaxis_title="Projekt",
-        xaxis=dict(type="date"),
-        font=dict(size=13, color="black"),
-        height=600,
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        showlegend=False
-    )
+    height=500
+)
 
     st.plotly_chart(gantt_fig, use_container_width=True)
