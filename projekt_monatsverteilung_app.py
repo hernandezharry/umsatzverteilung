@@ -66,7 +66,7 @@ if uploaded_file:
             lauf = (lauf + pd.DateOffset(months=1)).replace(day=1)
 
     st.subheader("📋 Verteilungstabelle")
-    st.dataframe(df_matrix.style.format("€ {:,.2f}").set_properties(**{"font-size": "14px", "color": "black"}))
+    st.markdown(df_matrix.style.format("€ {:,.2f}").set_table_attributes("style='font-size:16px; color:black;'").to_html(), unsafe_allow_html=True)
 
     df_result = pd.DataFrame(0.0, index=monat_colnames, columns=[])
     grouped = df_filtered.groupby("Phase")
