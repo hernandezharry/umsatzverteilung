@@ -88,12 +88,24 @@ if uploaded_file:
                     lauf = (lauf + pd.DateOffset(months=1)).replace(day=1)
             df_result[phase] = phase_series
 
+        # Farbpalette festlegen
+        farben = {
+    'Ausführung': '#1f77b4',
+    'Verhandlung': '#ff7f0e',
+    'Angebotsbearbeitung': '#2ca02c',
+    'Anfrage': '#d62728',
+    'Marktbeobachtung': '#9467bd'
+}
+
         fig = go.Figure()
-        for phase in df_result.columns:
+        phasen_reihenfolge = ['Ausführung', 'Verhandlung', 'Angebotsbearbeitung', 'Anfrage', 'Marktbeobachtung']
+phasen_sortiert = [p for p in phasen_reihenfolge if p in df_result.columns]
+for i, phase in enumerate(phasen_sortiert):
             fig.add_trace(go.Bar(
                 name=phase,
                 x=df_result.index,
                 y=df_result[phase],
+                marker_color=farben.get(phase, '#999999'),
                 hovertemplate=f"%{{x}}<br>{phase}: € %{{y:,.2f}}<extra></extra>"
             ))
 
@@ -103,14 +115,73 @@ if uploaded_file:
             xaxis_title="Monat",
             yaxis_title="Auftragssumme (€)",
             legend_title="Phase",
-            hovermode="x unified"
+            hovermode="x unified",
+            plot_bgcolor="white",
+            paper_bgcolor="white"
         )
 
         st.plotly_chart(fig, use_container_width=True)
 
-        # Export als PNG
+        # Export als PNG mit Layout
         img_bytes = pio.to_image(fig, format="png", width=1200, height=600, scale=2)
         st.download_button("🖼️ Diagramm als PNG herunterladen", data=img_bytes, file_name="diagramm_projektverteilung.png", mime="image/png")
 
         csv = df_result.reset_index().rename(columns={"index": "Monat"}).to_csv(index=False).encode("utf-8")
         st.download_button("📥 CSV herunterladen", csv, "monatsverteilung_phasen.csv", "text/csv")
+
+
+# Zweite Visualisierung: Projekt-Kostenstruktur
+st.subheader("📊 Projektkosten-Visualisierung")
+
+kosten_spalten = ["Herstellkosten", "Gewährleistung", "Ergebnis"]
+vorhandene_kosten = [col for col in kosten_spalten if col in df_filtered.columns]
+
+if vorhandene_kosten:
+    df_kosten = df_filtered[["Projekt", "Auftragssumme"] + vorhandene_kosten].copy()
+# Prozentuelle Umrechnung
+if "Ergebnis" in df_kosten.columns:
+    df_kosten["Ergebnis"] = df_kosten["Ergebnis"] / 100 * df_kosten["Auftragssumme"]
+if "Gewährleistung" in df_kosten.columns:
+    df_kosten["Gewährleistung"] = df_kosten["Gewährleistung"] / 100 * df_kosten["Auftragssumme"]
+
+    df_kosten = df_kosten.groupby("Projekt").sum(numeric_only=True)
+    df_kosten = df_kosten[vorhandene_kosten]
+
+    fig2 = go.Figure()
+    farben_kosten = {
+        "Herstellkosten": "#1f77b4",
+        "Gewährleistung": "#ff7f0e",
+        "Ergebnis": "#2ca02c"
+    }
+
+    for spalte in vorhandene_kosten:
+        fig2.add_trace(go.Bar(
+            x=df_kosten.index,
+            y=df_kosten[spalte],
+            name=spalte,
+            marker_color=farben_kosten.get(spalte, "#999999"),
+            hovertemplate=f"{spalte}: € %{{y:,.2f}}<extra></extra>"
+        ))
+
+    fig2.update_layout(
+        barmode='group',
+        title="Projektkosten nach Typ",
+        xaxis_title="Projekt",
+        yaxis_title="€ Betrag",
+        legend_title="Kostenart",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        hovermode="x unified"
+    )
+
+    st.plotly_chart(fig2, use_container_width=True)
+
+    # Download als PNG
+    img_bytes_2 = pio.to_image(fig2, format="png", width=1200, height=600, scale=2)
+    st.download_button("🖼️ Kosten-Diagramm als PNG herunterladen", data=img_bytes_2, file_name="projektkosten.png", mime="image/png")
+
+    # CSV Export
+    csv2 = df_kosten.reset_index().to_csv(index=False).encode("utf-8")
+    st.download_button("📥 Kosten-Daten als CSV", data=csv2, file_name="projektkosten.csv", mime="text/csv")
+else:
+    st.info("Keine der Spalten 'Herstellkosten', 'Gewährleistung', 'Ergebnis' in den Daten gefunden.")
