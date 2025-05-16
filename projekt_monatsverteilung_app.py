@@ -62,7 +62,15 @@ if uploaded_file:
                 df_matrix.loc[row["Projekt"], key] += wert
             lauf = (lauf + pd.DateOffset(months=1)).replace(day=1)
 
-    st.dataframe(df_matrix)
+    
+    st.markdown(
+        df_matrix.style
+        .format("€ {:,.2f}")
+        .set_table_attributes('style="color: white; font-size: 16px; background-color: #1e1e1e;"')
+        .to_html(),
+        unsafe_allow_html=True
+    )
+    
 
     csv = df_matrix.reset_index().to_csv(index=False).encode("utf-8")
     st.download_button("📥 CSV-Verteilung", data=csv, file_name="verteilung.csv", mime="text/csv")
