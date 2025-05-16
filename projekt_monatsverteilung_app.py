@@ -173,15 +173,6 @@ if uploaded_file:
     legend=dict(font=dict(color="white")),
     height=500
 )
-            barmode="group",
-            title="Projektkosten nach Typ",
-            xaxis_title="Projekt",
-            yaxis_title="Betrag (€)",
-            font=dict(size=13, color="black"),
-            height=500,
-            plot_bgcolor="white",
-            paper_bgcolor="white"
-        )
         st.plotly_chart(fig2, use_container_width=True)
 
     # Gantt-Diagramm (Visualisierung 3)
@@ -214,16 +205,6 @@ if uploaded_file:
     legend=dict(font=dict(color="white")),
     height=600,
     showlegend=False
-)
-    barmode="stack",
-    title="Monatliche Auftragssumme – gestapelt nach Phase",
-    font=dict(size=13, color="white"),
-    paper_bgcolor="#0e1117",
-    plot_bgcolor="#0e1117",
-    xaxis=dict(title="Monat", titlefont=dict(color="white"), tickfont=dict(color="white")),
-    yaxis=dict(title="Auftragssumme (€)", titlefont=dict(color="white"), tickfont=dict(color="white")),
-    legend=dict(font=dict(color="white")),
-    height=500
 )
 
     st.plotly_chart(gantt_fig, use_container_width=True)
