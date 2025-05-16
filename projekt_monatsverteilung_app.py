@@ -99,7 +99,7 @@ if uploaded_file:
 
         fig = go.Figure()
         phasen_reihenfolge = ['Ausführung', 'Verhandlung', 'Angebotsbearbeitung', 'Anfrage', 'Marktbeobachtung']
-phasen_sortiert = [p for p in phasen_reihenfolge if p in df_result.columns]
+phasen_sortiert = [p for p in phasen_reihenfolge if p in df_result.columns] + [p for p in df_result.columns if p not in phasen_reihenfolge]
 for i, phase in enumerate(phasen_sortiert):
             fig.add_trace(go.Bar(
                 name=phase,
@@ -130,7 +130,7 @@ for i, phase in enumerate(phasen_sortiert):
         st.download_button("📥 CSV herunterladen", csv, "monatsverteilung_phasen.csv", "text/csv")
 
 
-# Zweite Visualisierung: Projekt-Kostenstruktur
+# Zweite Visualisierung: Projektkosten mit Ergebnis/Gewährleistung in %
 st.subheader("📊 Projektkosten-Visualisierung")
 
 kosten_spalten = ["Herstellkosten", "Gewährleistung", "Ergebnis"]
@@ -138,14 +138,13 @@ vorhandene_kosten = [col for col in kosten_spalten if col in df_filtered.columns
 
 if vorhandene_kosten:
     df_kosten = df_filtered[["Projekt", "Auftragssumme"] + vorhandene_kosten].copy()
-# Prozentuelle Umrechnung
-if "Ergebnis" in df_kosten.columns:
-    df_kosten["Ergebnis"] = df_kosten["Ergebnis"] / 100 * df_kosten["Auftragssumme"]
-if "Gewährleistung" in df_kosten.columns:
-    df_kosten["Gewährleistung"] = df_kosten["Gewährleistung"] / 100 * df_kosten["Auftragssumme"]
+    if "Ergebnis" in df_kosten.columns:
+        df_kosten["Ergebnis"] = (df_kosten["Ergebnis"] / 100) * df_kosten["Auftragssumme"]
+    if "Gewährleistung" in df_kosten.columns:
+        df_kosten["Gewährleistung"] = (df_kosten["Gewährleistung"] / 100) * df_kosten["Auftragssumme"]
 
     df_kosten = df_kosten.groupby("Projekt").sum(numeric_only=True)
-    df_kosten = df_kosten[vorhandene_kosten]
+    df_kosten = df_kosten[[col for col in kosten_spalten if col in df_kosten.columns]]
 
     fig2 = go.Figure()
     farben_kosten = {
@@ -154,7 +153,7 @@ if "Gewährleistung" in df_kosten.columns:
         "Ergebnis": "#2ca02c"
     }
 
-    for spalte in vorhandene_kosten:
+    for spalte in df_kosten.columns:
         fig2.add_trace(go.Bar(
             x=df_kosten.index,
             y=df_kosten[spalte],
@@ -176,11 +175,9 @@ if "Gewährleistung" in df_kosten.columns:
 
     st.plotly_chart(fig2, use_container_width=True)
 
-    # Download als PNG
     img_bytes_2 = pio.to_image(fig2, format="png", width=1200, height=600, scale=2)
     st.download_button("🖼️ Kosten-Diagramm als PNG herunterladen", data=img_bytes_2, file_name="projektkosten.png", mime="image/png")
 
-    # CSV Export
     csv2 = df_kosten.reset_index().to_csv(index=False).encode("utf-8")
     st.download_button("📥 Kosten-Daten als CSV", data=csv2, file_name="projektkosten.csv", mime="text/csv")
 else:
