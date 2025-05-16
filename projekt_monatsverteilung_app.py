@@ -73,6 +73,64 @@ if uploaded_file:
     csv = df_matrix.reset_index().to_csv(index=False).encode("utf-8")
     st.download_button("📥 CSV-Verteilung", data=csv, file_name="verteilung.csv", mime="text/csv")
 
+    # Gestapeltes Balkendiagramm (Visualisierung 1)
+    st.subheader("📊 Monatsverteilung (gestapelt nach Phase)")
+
+    df_result = pd.DataFrame(0.0, index=colnames, columns=[])
+    grouped = df_filtered.groupby("Phase")
+
+    for phase, group in grouped:
+        phase_series = pd.Series(0.0, index=colnames)
+        for _, row in group.iterrows():
+            start_monat = row["Beginn"].replace(day=1)
+            end_monat = row["Ende"].replace(day=1)
+            anz_monate = ((end_monat.year - start_monat.year) * 12 + end_monat.month - start_monat.month + 1)
+            if anz_monate <= 0:
+                continue
+            wert_pro_monat = row["Auftragssumme"] / anz_monate
+            lauf = start_monat
+            for _ in range(anz_monate):
+                key = lauf.strftime("%Y-%m")
+                if key in phase_series.index:
+                    phase_series[key] += wert_pro_monat
+                lauf = (lauf + pd.DateOffset(months=1)).replace(day=1)
+        df_result[phase] = phase_series
+
+    farben_phase = {
+        "Ausführung": "#1f77b4",
+        "Verhandlung": "#ff7f0e",
+        "Angebotsbearbeitung": "#2ca02c",
+        "Anfrage": "#d62728",
+        "Marktbeobachtung": "#9467bd"
+    }
+
+    phasen_sortiert = ["Ausführung", "Verhandlung", "Angebotsbearbeitung", "Anfrage", "Marktbeobachtung"]
+    phasen_final = [p for p in phasen_sortiert if p in df_result.columns] + [p for p in df_result.columns if p not in phasen_sortiert]
+
+    fig = go.Figure()
+    for phase in phasen_final:
+        fig.add_trace(go.Bar(
+            name=phase,
+            x=df_result.index,
+            y=df_result[phase],
+            marker_color=farben_phase.get(phase, "#999999"),
+            hovertemplate=f"%{{x}}<br>{phase}: € %{{y:,.2f}}<extra></extra>"
+        ))
+
+    fig.update_layout(
+        barmode="stack",
+        title="Monatliche Auftragssumme – gestapelt nach Phase",
+        xaxis_title="Monat",
+        yaxis_title="Auftragssumme (€)",
+        font=dict(size=13, color="black"),
+        height=500,
+        plot_bgcolor="white",
+        paper_bgcolor="white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
     # Projektkosten (Visualisierung 2)
     kosten_cols = ["Herstellkosten", "Ergebnis", "Gewährleistung"]
     vorhanden = [c for c in kosten_cols if c in df_filtered.columns]
