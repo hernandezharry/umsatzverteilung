@@ -123,8 +123,8 @@ if uploaded_file:
     font=dict(size=13, color="white"),
     paper_bgcolor="#0e1117",
     plot_bgcolor="#0e1117",
-    xaxis=dict(title="Monat", titlefont=dict(color="white"), tickfont=dict(color="white")),
-    yaxis=dict(title="Auftragssumme (€)", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    xaxis_title="Monat", xaxis=dict(tickfont=dict(color="white")),
+    yaxis_title="Auftragssumme (€)", yaxis=dict(tickfont=dict(color="white")),
     legend=dict(font=dict(color="white")),
     height=500
 )
@@ -168,8 +168,8 @@ if uploaded_file:
     font=dict(size=13, color="white"),
     paper_bgcolor="#0e1117",
     plot_bgcolor="#0e1117",
-    xaxis=dict(title="Projekt", titlefont=dict(color="white"), tickfont=dict(color="white")),
-    yaxis=dict(title="Betrag (€)", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    xaxis_title="Projekt", xaxis=dict(tickfont=dict(color="white")),
+    yaxis_title="Betrag (€)", yaxis=dict(tickfont=dict(color="white")),
     legend=dict(font=dict(color="white")),
     height=500
 )
@@ -200,8 +200,8 @@ if uploaded_file:
     font=dict(size=13, color="white"),
     paper_bgcolor="#0e1117",
     plot_bgcolor="#0e1117",
-    xaxis=dict(title="Datum", titlefont=dict(color="white"), tickfont=dict(color="white"), type="date"),
-    yaxis=dict(title="Projekt", titlefont=dict(color="white"), tickfont=dict(color="white")),
+    xaxis_title="Datum", xaxis=dict(type="date", tickfont=dict(color="white")),
+    yaxis_title="Projekt", yaxis=dict(tickfont=dict(color="white")),
     legend=dict(font=dict(color="white")),
     height=600,
     showlegend=False
