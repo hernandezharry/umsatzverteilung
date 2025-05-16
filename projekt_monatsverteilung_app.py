@@ -112,6 +112,10 @@ if uploaded_file:
         ))
 
     fig.update_layout(
+    font=dict(size=14),
+    xaxis=dict(title_font=dict(size=16), tickfont=dict(size=12), tickangle=-30),
+    yaxis=dict(title_font=dict(size=16), tickfont=dict(size=12)),
+    legend=dict(font=dict(size=12)),
         barmode='stack',
         title="Monatliche Auftragssumme – gestapelt nach Phase",
         xaxis_title="Monat",
@@ -124,7 +128,7 @@ if uploaded_file:
 
     st.plotly_chart(fig, use_container_width=True)
 
-    img_bytes = pio.to_image(fig, format="png", width=1200, height=600, scale=2)
+    img_bytes = pio.to_image(fig, format="png", width=1400, height=700, scale=3)
     st.download_button("🖼️ Diagramm als PNG herunterladen", data=img_bytes, file_name="diagramm_monatsverteilung.png", mime="image/png")
 
     csv = df_result.reset_index().rename(columns={"index": "Monat"}).to_csv(index=False).encode("utf-8")
@@ -163,6 +167,10 @@ if uploaded_file:
             ))
 
         fig2.update_layout(
+    font=dict(size=14),
+    xaxis=dict(title_font=dict(size=16), tickfont=dict(size=12), tickangle=-30),
+    yaxis=dict(title_font=dict(size=16), tickfont=dict(size=12)),
+    legend=dict(font=dict(size=12)),
             barmode='group',
             title="Projektkosten nach Typ",
             xaxis_title="Projekt",
@@ -175,7 +183,7 @@ if uploaded_file:
 
         st.plotly_chart(fig2, use_container_width=True)
 
-        img_bytes_2 = pio.to_image(fig2, format="png", width=1200, height=600, scale=2)
+        img_bytes_2 = pio.to_image(fig2, format="png", width=1400, height=700, scale=3)
         st.download_button("🖼️ Kosten-Diagramm als PNG herunterladen", data=img_bytes_2, file_name="projektkosten.png", mime="image/png")
 
         csv2 = df_kosten.reset_index().to_csv(index=False).encode("utf-8")
