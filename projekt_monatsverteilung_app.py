@@ -106,7 +106,7 @@ if uploaded_file:
 
         for m in months:
             df_long = pd.concat([df_long, pd.DataFrame([{
-                "Monat": m.strftime("%Y-%m"),
+                "Monat": pd.to_datetime(m).strftime("%Y-%m"),
                 "Projekt": projekt,
                 "Phase": phase,
                 "Anteil": share
