@@ -121,8 +121,13 @@ if uploaded_file:
         xaxis_title="Monat",
         xaxis=dict(tickfont=dict(color="white")),
         yaxis_title="Auftragssumme (€)",
-        yaxis=dict(tickfont=dict(color="white")),
-        legend=dict(font=dict(color="white")),
+        yaxis=dict(
+        tickmode="array",
+        tickvals=list(range(len(df_filtered))),
+        ticktext=df_filtered["Projekt"].tolist(),
+        tickfont=dict(color="white")
+    ),
+    legend=dict(font=dict(color="white")),
         height=500
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -163,8 +168,13 @@ if uploaded_file:
             xaxis_title="Projekt",
             xaxis=dict(tickfont=dict(color="white")),
             yaxis_title="Betrag (€)",
-            yaxis=dict(tickfont=dict(color="white")),
-            legend=dict(font=dict(color="white")),
+            yaxis=dict(
+        tickmode="array",
+        tickvals=list(range(len(df_filtered))),
+        ticktext=df_filtered["Projekt"].tolist(),
+        tickfont=dict(color="white")
+    ),
+    legend=dict(font=dict(color="white")),
             height=500
         )
         st.plotly_chart(fig2, use_container_width=True)
