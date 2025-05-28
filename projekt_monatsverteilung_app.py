@@ -23,11 +23,11 @@ if uploaded_file:
     month_range = pd.date_range(all_start, all_end, freq="MS")
     month_labels = [d.strftime("%Y-%m") for d in month_range]
 
-    df_matrix = pd.DataFrame(0, index=df["Projekt"], columns=month_labels)
+    df_matrix = pd.DataFrame(0, index=df["Projekt"], columns=month_labels, dtype=float)
 
     for _, row in df.iterrows():
         proj = row["Projekt"]
-        betrag = row["Betrag"] if pd.notnull(row["Betrag"]) else 0
+        betrag = row["Auftragssumme"] if pd.notnull(row["Auftragssumme"]) else 0
         months = pd.date_range(row["Beginn"], row["Ende"], freq="MS")
         if len(months) == 0:
             continue
@@ -43,7 +43,7 @@ if uploaded_file:
 
     df_plot = df.copy()
     df_plot["Monat"] = df_plot["Beginn"].dt.to_period("M").astype(str)
-    df_plot = df_plot.groupby(["Monat", "Phase"]).agg({"Betrag": "sum"}).reset_index()
+    df_plot = df_plot.groupby(["Monat", "Phase"]).agg({"Auftragssumme": "sum"}).reset_index()
 
     farben = {
         "Ausführung": "#0070C0",
@@ -53,7 +53,7 @@ if uploaded_file:
         "Marktbeobachtung": "#BFBFBF"
     }
 
-    fig = px.bar(df_plot, x="Monat", y="Betrag", color="Phase", color_discrete_map=farben)
+    fig = px.bar(df_plot, x="Monat", y="Auftragssumme", color="Phase", color_discrete_map=farben)
     fig.update_layout(
         barmode="stack",
         plot_bgcolor="white",
