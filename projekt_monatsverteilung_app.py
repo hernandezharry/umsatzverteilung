@@ -42,6 +42,7 @@ if uploaded_file:
     st.subheader("📊 Gestapeltes Balkendiagramm (nach Phase)")
 
     df_plot = df.copy()
+    df_plot["Phase"] = pd.Categorical(df_plot["Phase"], categories=["Ausführung", "Verhandlung", "Angebotsbearbeitung", "Anfrage", "Marktbeobachtung"], ordered=True)
     df_plot["Monat"] = df_plot["Beginn"].dt.to_period("M").astype(str)
     df_plot = df_plot.groupby(["Monat", "Phase"]).agg({"Auftragssumme": "sum"}).reset_index()
 
@@ -56,13 +57,13 @@ if uploaded_file:
     fig = px.bar(df_plot, x="Monat", y="Auftragssumme", color="Phase", color_discrete_map=farben)
     fig.update_layout(
         barmode="stack",
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        font=dict(color="black"),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="white"),
         title="Projektvolumen pro Monat nach Phase",
         xaxis_title="Monat",
         yaxis_title="Betrag (€)",
-        legend_title="Phase"
+        legend_title="Phase", legend=dict(font=dict(color="white"))
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -85,12 +86,12 @@ if uploaded_file:
     gantt_fig.update_layout(
         title="Projektzeiträume",
         font=dict(size=13, color="black"),
-        paper_bgcolor="white",
-        plot_bgcolor="white",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
         xaxis_title="Datum",
         yaxis=dict(
             title="Projekt",
-            tickfont=dict(color="black")
+            tickfont=dict(color="white")
         ),
         height=600
     )
@@ -141,9 +142,9 @@ if "Ergebnis" in df.columns and "Gewährleistung" in df.columns:
 
     fig2.update_layout(
         barmode="group",
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        font=dict(color="black"),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="white"),
         xaxis_title="Projekt",
         yaxis_title="Prozent [%]",
         legend_title="Kennzahl",
