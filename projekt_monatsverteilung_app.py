@@ -86,3 +86,63 @@ if uploaded_file:
     )
 
     st.plotly_chart(gantt_fig, use_container_width=True)
+
+    st.subheader("📊 Monatsverteilung je Projekt (gestapelt nach Phase)")
+
+    df_long = pd.DataFrame()
+
+    for _, row in df.iterrows():
+        projekt = row["Projekt"]
+        phase = row["Phase"]
+        start = row["Beginn"]
+        ende = row["Ende"]
+        betrag = row["Auftragssumme"]
+
+        if pd.isnull(start) or pd.isnull(ende) or pd.isnull(betrag):
+            continue
+
+        months = pd.date_range(start, ende, freq="MS")
+        share = betrag / len(months) if len(months) > 0 else 0
+
+        for m in months:
+            df_long = pd.concat([df_long, pd.DataFrame([{
+                "Monat": m.strftime("%Y-%m"),
+                "Projekt": projekt,
+                "Phase": phase,
+                "Anteil": share
+            }])])
+
+    df_grouped = df_long.groupby(["Monat", "Projekt", "Phase"]).sum(numeric_only=True).reset_index()
+
+    phase_order = ["Ausführung", "Verhandlung", "Angebotsbearbeitung", "Anfrage", "Marktbeobachtung"]
+    farben = {
+        "Ausführung": "#0070C0",
+        "Verhandlung": "#FFC000",
+        "Angebotsbearbeitung": "#00B050",
+        "Anfrage": "#9966FF",
+        "Marktbeobachtung": "#BFBFBF"
+    }
+
+    fig_proj = px.bar(
+        df_grouped,
+        x="Monat",
+        y="Anteil",
+        color="Phase",
+        facet_col="Projekt",
+        facet_col_wrap=4,
+        category_orders={"Phase": phase_order},
+        color_discrete_map=farben
+    )
+
+    fig_proj.update_layout(
+        height=700,
+        barmode="stack",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="white"),
+        xaxis_title="Monat",
+        yaxis_title="Auftragssumme (€)",
+        legend_title="Phase"
+    )
+
+    st.plotly_chart(fig_proj, use_container_width=True)
