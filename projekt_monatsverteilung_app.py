@@ -181,7 +181,7 @@ if uploaded_file:
 
     # === Gantt-Diagramm ===
     st.subheader("📅 Projekt-Zeitleiste (Gantt-Diagramm)")
-    gantt_fig = go.Figure()
+gantt_fig = go.Figure()
 
     for _, row in df_filtered.iterrows():
         if row["Ende"] <= row["Beginn"]:
