@@ -15,13 +15,7 @@ if uploaded_file:
 
     st.subheader("📆 Projekt-Zeitleiste (Gantt-Diagramm mit Phase-Farben)")
 
-    farben = {
-        "Ausführung": "#0070C0",
-        "Verhandlung": "#FFC000",
-        "Angebotsbearbeitung": "#00B050",
-        "Anfrage": "#9966FF",
-        "Marktbeobachtung": "#BFBFBF"
-    }
+    farben = {'Ausführung': '#0070C0', 'Verhandlung': '#FFC000', 'Angebotsbearbeitung': '#00B050', 'Anfrage': '#9966FF', 'Marktbeobachtung': '#BFBFBF'}
 
     df_gantt = df[["Projekt", "Beginn", "Ende", "Phase"]].copy()
     df_gantt = df_gantt.dropna(subset=["Beginn", "Ende", "Phase"])
