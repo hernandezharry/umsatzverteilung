@@ -95,3 +95,58 @@ if uploaded_file:
         height=600
     )
     st.plotly_chart(gantt_fig, use_container_width=True)
+
+
+# 🔍 Weitere Auswertungen
+
+st.subheader("📈 Weitere Auswertungen")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("**Durchschnittliches Ergebnis [%]**")
+    if "Ergebnis" in df.columns:
+        st.metric("⌀ Ergebnis", f"{df['Ergebnis'].dropna().mean():.2f} %")
+
+with col2:
+    st.markdown("**Durchschnittliche Gewährleistung [%]**")
+    if "Gewährleistung" in df.columns:
+        st.metric("⌀ Gewährleistung", f"{df['Gewährleistung'].dropna().mean():.2f} %")
+
+with col3:
+    st.markdown("**Durchschnittliche Herstellkosten [€]**")
+    if "Herstellkosten" in df.columns:
+        st.metric("⌀ Herstellkosten", f"{df['Herstellkosten'].dropna().mean():,.0f} €")
+
+# Balkendiagramm Ergebnis & Gewährleistung je Projekt
+if "Ergebnis" in df.columns and "Gewährleistung" in df.columns:
+    df_eg = df[["Projekt", "Ergebnis", "Gewährleistung"]].dropna()
+    df_eg = df_eg.set_index("Projekt")
+
+    st.subheader("📊 Ergebnis & Gewährleistung je Projekt (%)")
+
+    fig2 = go.Figure()
+    fig2.add_trace(go.Bar(
+        x=df_eg.index,
+        y=df_eg["Ergebnis"],
+        name="Ergebnis",
+        marker_color="green"
+    ))
+    fig2.add_trace(go.Bar(
+        x=df_eg.index,
+        y=df_eg["Gewährleistung"],
+        name="Gewährleistung",
+        marker_color="orange"
+    ))
+
+    fig2.update_layout(
+        barmode="group",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color="black"),
+        xaxis_title="Projekt",
+        yaxis_title="Prozent [%]",
+        legend_title="Kennzahl",
+        title="Ergebnis vs. Gewährleistung"
+    )
+    st.plotly_chart(fig2, use_container_width=True)
