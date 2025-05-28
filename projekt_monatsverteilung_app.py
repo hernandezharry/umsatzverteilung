@@ -200,9 +200,9 @@ gantt_fig = go.Figure()
             showlegend=False
         ))
 
-    
+
     gantt_fig.update_traces(marker_line_color='white', marker_line_width=1, selector=dict(type="scatter"))
-    
+
 gantt_fig.update_layout(
     title="Projektzeiträume",
     font=dict(size=13, color="white"),
