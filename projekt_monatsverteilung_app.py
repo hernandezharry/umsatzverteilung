@@ -3,49 +3,22 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from io import BytesIO
 
 st.set_page_config(layout="wide")
-st.title("📊 Projekt-Monatsverteilung & Gantt-Analyse")
+st.title("📊 Umsatzverteilung & Projektanalyse")
 
-uploaded_file = st.file_uploader("📁 Excel-Datei mit Projekt-Daten hochladen", type=["xls", "xlsx"])
+uploaded_file = st.file_uploader("📂 Excel-Datei mit Projektliste hochladen", type=["xlsx"])
 
 if uploaded_file:
-    df = pd.read_excel(uploaded_file, sheet_name="Projekte")
+    df = pd.read_excel(uploaded_file)
 
+    # Datumsfelder konvertieren
     df["Beginn"] = pd.to_datetime(df["Beginn"], errors="coerce")
     df["Ende"] = pd.to_datetime(df["Ende"], errors="coerce")
-    df = df.dropna(subset=["Beginn", "Ende"])
-
-    st.subheader("📅 Monatsverteilung")
-    all_start = df["Beginn"].min()
-    all_end = df["Ende"].max()
-    month_range = pd.date_range(all_start, all_end, freq="MS")
-    month_labels = [d.strftime("%Y-%m") for d in month_range]
-
-    df_matrix = pd.DataFrame(0, index=df["Projekt"], columns=month_labels, dtype=float)
-
-    for _, row in df.iterrows():
-        proj = row["Projekt"]
-        betrag = row["Auftragssumme"] if pd.notnull(row["Auftragssumme"]) else 0
-        months = pd.date_range(row["Beginn"], row["Ende"], freq="MS")
-        if len(months) == 0:
-            continue
-        share = betrag / len(months)
-        for m in months:
-            label = m.strftime("%Y-%m")
-            if label in df_matrix.columns:
-                df_matrix.loc[proj, label] += share
-
-    st.dataframe(df_matrix.style.format("€ {:,.2f}"))
 
     st.subheader("📊 Gestapeltes Balkendiagramm (nach Phase)")
 
-    df_plot = df.copy()
-    df_plot["Phase"] = pd.Categorical(df_plot["Phase"], categories=["Ausführung", "Verhandlung", "Angebotsbearbeitung", "Anfrage", "Marktbeobachtung"], ordered=True)
-    df_plot["Monat"] = df_plot["Beginn"].dt.to_period("M").astype(str)
-    df_plot = df_plot.groupby(["Monat", "Phase"]).agg({"Auftragssumme": "sum"}).reset_index()
-
+    phase_order = ["Ausführung", "Verhandlung", "Angebotsbearbeitung", "Anfrage", "Marktbeobachtung"]
     farben = {
         "Ausführung": "#0070C0",
         "Verhandlung": "#FFC000",
@@ -54,7 +27,21 @@ if uploaded_file:
         "Marktbeobachtung": "#BFBFBF"
     }
 
-    fig = px.bar(df_plot, x="Monat", y="Auftragssumme", color="Phase", color_discrete_map=farben)
+    df_bar = df.copy()
+    df_bar["Phase"] = pd.Categorical(df_bar["Phase"], categories=phase_order, ordered=True)
+    df_bar["Monat"] = df_bar["Beginn"].dt.to_period("M").astype(str)
+
+    df_bar_grouped = df_bar.groupby(["Monat", "Phase"]).agg({"Auftragssumme": "sum"}).reset_index()
+
+    fig = px.bar(
+        df_bar_grouped,
+        x="Monat",
+        y="Auftragssumme",
+        color="Phase",
+        category_orders={"Phase": phase_order},
+        color_discrete_map=farben
+    )
+
     fig.update_layout(
         barmode="stack",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -62,92 +49,40 @@ if uploaded_file:
         font=dict(color="white"),
         title="Projektvolumen pro Monat nach Phase",
         xaxis_title="Monat",
-        yaxis_title="Betrag (€)",
-        legend_title="Phase", legend=dict(font=dict(color="white"))
+        yaxis_title="Auftragssumme (€)",
+        legend_title="Phase",
+        legend=dict(font=dict(color="white"))
     )
+
     st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("📆 Gantt-Diagramm")
 
     df_gantt = df.copy()
-    df_gantt = df_gantt.sort_values("Beginn")
-    df_gantt["ID"] = df_gantt.index
+    df_gantt = df_gantt[df_gantt["Beginn"].notna() & df_gantt["Ende"].notna()]
 
-    gantt_fig = go.Figure()
-    for i, row in df_gantt.iterrows():
-        gantt_fig.add_trace(go.Scatter(
-            x=[row["Beginn"], row["Ende"]],
-            y=[row["Projekt"], row["Projekt"]],
-            mode="lines",
-            line=dict(width=20, color=farben.get(row["Phase"], "gray")),
-            showlegend=False
-        ))
+    df_gantt["Phase"] = pd.Categorical(df_gantt["Phase"], categories=phase_order, ordered=True)
 
-    gantt_fig.update_layout(
-        title="Projektzeiträume",
-        font=dict(size=13, color="black"),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        xaxis_title="Datum",
-        yaxis=dict(
-            title="Projekt",
-            tickfont=dict(color="white")
-        ),
-        height=600
+    gantt_fig = px.timeline(
+        df_gantt,
+        x_start="Beginn",
+        x_end="Ende",
+        y="Projekt",
+        color="Phase",
+        color_discrete_map=farben,
+        hover_data=["Phase", "Auftragssumme", "Ergebnis", "Gewährleistung"]
     )
-    st.plotly_chart(gantt_fig, use_container_width=True)
 
-
-# 🔍 Weitere Auswertungen
-
-st.subheader("📈 Weitere Auswertungen")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("**Durchschnittliches Ergebnis [%]**")
-    if "Ergebnis" in df.columns:
-        st.metric("⌀ Ergebnis", f"{df['Ergebnis'].dropna().mean():.2f} %")
-
-with col2:
-    st.markdown("**Durchschnittliche Gewährleistung [%]**")
-    if "Gewährleistung" in df.columns:
-        st.metric("⌀ Gewährleistung", f"{df['Gewährleistung'].dropna().mean():.2f} %")
-
-with col3:
-    st.markdown("**Durchschnittliche Herstellkosten [€]**")
-    if "Herstellkosten" in df.columns:
-        st.metric("⌀ Herstellkosten", f"{df['Herstellkosten'].dropna().mean():,.0f} €")
-
-# Balkendiagramm Ergebnis & Gewährleistung je Projekt
-if "Ergebnis" in df.columns and "Gewährleistung" in df.columns:
-    df_eg = df[["Projekt", "Ergebnis", "Gewährleistung"]].dropna()
-    df_eg = df_eg.set_index("Projekt")
-
-    st.subheader("📊 Ergebnis & Gewährleistung je Projekt (%)")
-
-    fig2 = go.Figure()
-    fig2.add_trace(go.Bar(
-        x=df_eg.index,
-        y=df_eg["Ergebnis"],
-        name="Ergebnis",
-        marker_color="green"
-    ))
-    fig2.add_trace(go.Bar(
-        x=df_eg.index,
-        y=df_eg["Gewährleistung"],
-        name="Gewährleistung",
-        marker_color="orange"
-    ))
-
-    fig2.update_layout(
-        barmode="group",
+    gantt_fig.update_yaxes(autorange="reversed", tickfont=dict(color="white"))
+    gantt_fig.update_layout(
         plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
         font=dict(color="white"),
-        xaxis_title="Projekt",
-        yaxis_title="Prozent [%]",
-        legend_title="Kennzahl",
-        title="Ergebnis vs. Gewährleistung"
+        xaxis_title="Zeitraum",
+        yaxis_title="Projekt",
+        title="Projektzeitplan (Gantt-Diagramm)",
+        legend_title="Phase",
+        legend=dict(font=dict(color="white"))
     )
-    st.plotly_chart(fig2, use_container_width=True)
+
+    st.plotly_chart(gantt_fig, use_container_width=True)
