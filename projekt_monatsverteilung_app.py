@@ -4,6 +4,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime
 
+st.title("📊 Übersicht Umsatzverteilung")
+
 st.set_page_config(page_title="Projekt-Monatsverteilung", layout="wide")
 
 uploaded_file = st.file_uploader("📄 Excel-Datei mit Projekten hochladen", type=["xls", "xlsx", "xlsm"])
