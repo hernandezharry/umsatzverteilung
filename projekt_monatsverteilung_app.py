@@ -13,7 +13,6 @@ if uploaded_file:
     st.subheader("📋 Eingelesene Projektdaten")
     st.dataframe(df)
 
-    # 📆 Gantt-Diagramm mit Phasenfarben
     st.subheader("📆 Projekt-Zeitleiste (Gantt-Diagramm mit Phase-Farben)")
 
     farben = {
@@ -41,12 +40,12 @@ if uploaded_file:
     )
 
     fig_gantt.update_layout(
-        height=600,
+        height=700,
         xaxis_title="Zeitraum",
         yaxis_title="Projekt",
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        font=dict(color="black"),
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
+        font=dict(color="#000000"),
         legend_title="Phase"
     )
 
