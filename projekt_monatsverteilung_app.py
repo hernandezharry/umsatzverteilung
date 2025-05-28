@@ -190,7 +190,15 @@ if uploaded_file:
             showlegend=False
         ))
 
+    
+    gantt_fig.update_traces(marker_line_color='white', marker_line_width=1, selector=dict(type="scatter"))
     gantt_fig.update_layout(
+        yaxis=dict(
+            tickmode="array",
+            tickvals=list(range(len(df_filtered))),
+            ticktext=df_filtered["Projekt"].tolist(),
+            tickfont=dict(color="white")
+        ),
         title="Projektzeiträume",
         font=dict(size=13, color="white"),
         paper_bgcolor="#0e1117",
