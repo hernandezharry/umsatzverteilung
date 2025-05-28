@@ -202,21 +202,22 @@ if uploaded_file:
 
     
     gantt_fig.update_traces(marker_line_color='white', marker_line_width=1, selector=dict(type="scatter"))
-    gantt_fig.update_layout(
-        yaxis=dict(
-            tickmode="array",
-            tickvals=list(range(len(df_filtered))),
-            ticktext=df_filtered["Projekt"].tolist(),
-            tickfont=dict(color="white")
-        ),
-        title="Projektzeiträume",
-        font=dict(size=13, color="white"),
-        paper_bgcolor="#0e1117",
-        plot_bgcolor="#0e1117",
-        xaxis_title="Datum",
-        xaxis=dict(type="date", tickfont=dict(color="white")),
-        yaxis_title="Projekt",
-        yaxis=dict(tickfont=dict(color="white")),
-        height=600
-    )
+    
+gantt_fig.update_layout(
+    title="Projektzeiträume",
+    font=dict(size=13, color="white"),
+    paper_bgcolor="#0e1117",
+    plot_bgcolor="#0e1117",
+    xaxis_title="Datum",
+    xaxis=dict(type="date", tickfont=dict(color="white")),
+    yaxis=dict(
+        title="Projekt",
+        tickmode="array",
+        tickvals=list(range(len(df_filtered))),
+        ticktext=df_filtered["Projekt"].tolist(),
+        tickfont=dict(color="white")
+    ),
+    height=600
+)
+
     st.plotly_chart(gantt_fig, use_container_width=True)
